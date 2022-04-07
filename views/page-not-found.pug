@@ -1,0 +1,8 @@
+extends layout 
+//- This page is for 404 error
+block content 
+    h1 Page Not Found
+    p Sorry! We couldn't find the page you were looking for.
+    h2 #{err.status} #{err.message} 
+    br
+        a(class="button", href="/") Home
