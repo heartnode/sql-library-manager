@@ -18,6 +18,9 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.STRING,
       allowNull: false,
       validate:{
+        notNull:{
+          msg: '"Title" is required.'
+        },
         notEmpty:{
           msg: '"Title" is required.'
         }
@@ -27,13 +30,42 @@ module.exports = (sequelize, DataTypes) => {
       type:DataTypes.STRING,
       allowNull: false,
       validate:{
+        notNull:{
+          msg: '"Author" is required.'
+        },
         notEmpty:{
           msg: '"Author" is required.'
         }
       }
     }, 
-    genre: DataTypes.STRING,
-    year: DataTypes.INTEGER
+    genre:{
+      type: DataTypes.STRING,
+      allowNull: true,
+      /*
+      validate:{
+        notNull: {
+          msg: '"Genre" is required.',
+        },
+        notEmpty:{
+          msg: '"Genre" is required.',
+        }
+      }
+      */
+    }, 
+    year:{
+      type:DataTypes.INTEGER,
+      allowNull: true,
+      /*
+      validate:{
+        notNull: {
+          msg: '"Year" is required.',
+        },
+        notEmpty:{
+          msg: '"Year" is required.'
+        }
+      }
+      */
+    } 
   }, {
     sequelize,
     modelName: 'Book',
