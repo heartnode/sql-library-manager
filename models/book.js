@@ -55,11 +55,13 @@ module.exports = (sequelize, DataTypes) => {
     year:{
       type:DataTypes.INTEGER,
       allowNull: true,
+      /*
       validate:{
         isInt:{
           msg:'"Year" must be an integer.'
         }
       }
+      */
       /*
       validate:{
         notNull: {
