@@ -2,7 +2,7 @@ extends ../layout
 
 block content
   h1= title
-  form(action="/books/search" method="POST")
+  form(action="/books/search" method="GET")
     input(type="text" placeHolder="Search for books" id="searchText" name="query")
     input(type="submit" id="searchBtn" value="Search")
   p 
@@ -22,3 +22,4 @@ block content
           td= book.author 
           td= book.genre 
           td= book.year 
+  include pagination.pug 

@@ -14,17 +14,32 @@ function asyncHandler(cb){
     }
   }
 
-router.get('/',asyncHandler(async (req,res)=>{
-    const books = await Book.findAll();
-   // console.log(books);
-    res.render('books/index', {title:"Books", books});
+router.get('/',asyncHandler(async (req,res,next)=>{
+    const page = (parseInt(req.query.page) >= 1) ? parseInt(req.query.page)  : 1;
+    const limit = req.query.limit || 5;
+    const offset = (page - 1) * limit;
+    const url = '/books?limit=' + limit;
+
+    const {count, rows} = await Book.findAndCountAll({
+        offset,
+        limit
+    });
+    //When no search results show 404
+    if (rows.length === 0){
+        next();
+        return;
+    }
+
+    const numOfPages = Math.ceil(count / limit);
+
+    res.render('books/index', {title:"Books", books:rows,url,currentPage:page, numOfPages});
 }));
 
 /**
  * Shows the create new book form
  */
  router.get('/new',asyncHandler(async (req,res)=>{
-    res.render('books/new', {book:{}, title: "New Book"})
+    res.render('books/new-book', {book:{}, title: "New Book"})
 }));
 
 /**
@@ -38,11 +53,35 @@ router.post('/new',asyncHandler(async (req,res)=>{
     } catch (error){
         if (error.name === 'SequelizeValidationError'){
             book = await Book.build(req.body);
-            res.render("books/new",{book, errors:error.errors, title: "New Book"});
+            res.render("books/new-book",{book, errors:error.errors, title: "New Book"});
         }
     }
 }));
 
+
+router.get('/search', asyncHandler(async(req,res,next)=>{
+    const query = '%'+ req.query.query + '%';
+    const page = (parseInt(req.query.page) >= 1) ? parseInt(req.query.page)  : 1;
+    const limit = req.query.limit || 5;
+    const offset = (page - 1) * limit;
+    const url = '/books/search?query=' + req.query.query + '&limit=' + limit;
+
+    const {count, rows} = await Book.findAndCountAll({
+        where:{
+            [Op.or]:[
+                {title:{[Op.like]: query}},
+                {author:{[Op.like]: query}},
+                {genre:{[Op.like]: query}},
+                {year:{[Op.like]: query}}
+            ]
+        } ,
+        offset: offset,
+        limit: limit
+    });
+    const numOfPages = Math.ceil(count / limit);
+
+    res.render('books/index', {books:rows, currentPage:page, numOfPages,url,title:"Books with " + req.query.query});
+}));
 /**
  * Search books in the database
  */
@@ -80,7 +119,7 @@ router.post('/search', asyncHandler(async(req,res)=>{
 router.get('/:id',asyncHandler(async(req,res,next)=>{
     const book = await Book.findByPk(req.params.id);
     if (book){
-        res.render('books/detail',{title:"Update Book", book});
+        res.render('books/update-book',{title:"Update Book", book});
     } else {
         next();
     }
@@ -108,7 +147,7 @@ router.post('/:id',asyncHandler(async (req,res,next)=>{
         if (error.name === 'SequelizeValidationError'){
             book = await Book.build(req.body);
             book.id = req.params.id;
-            res.render("books/detail", {book, errors: error.errors, title: "Update Book"});
+            res.render("books/update-book", {book, errors: error.errors, title: "Update Book"});
         } else{
             throw error;
         }
